@@ -1,0 +1,25 @@
+{
+  "short_name": "AKARI Stock",
+  "name": "AKARI Import - Control de Stock & IA",
+  "description": "Sistema de gestión de inventario en tiempo real, escáner IA y sincronización con Google Sheets para AKARI Import",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "display": "standalone",
+  "orientation": "any",
+  "scope": "/",
+  "categories": ["business", "productivity", "utilities"]
+}
