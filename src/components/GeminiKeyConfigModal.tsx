@@ -33,7 +33,13 @@ export const GeminiKeyConfigModal: React.FC<GeminiKeyConfigModalProps> = ({ isOp
         headers['x-gemini-api-key'] = currentKey;
       }
       const res = await fetch('/api/config/gemini-key', { headers });
-      const data = await res.json();
+      const text = await res.text();
+      let data = { isConfigured: false, isCustom: false, hasServerKey: false };
+      try {
+        if (text) data = JSON.parse(text);
+      } catch (e) {
+        console.error('Error parsing JSON from GET gemini-key:', e);
+      }
       setKeyStatus(data);
     } catch (err) {
       console.error('Error checking Gemini API key status:', err);
@@ -59,7 +65,14 @@ export const GeminiKeyConfigModal: React.FC<GeminiKeyConfigModalProps> = ({ isOp
         body: JSON.stringify({ apiKey: trimmedKey }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (parseErr) {
+        console.error('Non-JSON response from server:', text);
+        data = { error: `Respuesta no válida del servidor (${res.status}). Intenta nuevamente.` };
+      }
 
       if (res.ok && data.success) {
         localStorage.setItem('akari_gemini_api_key', trimmedKey);

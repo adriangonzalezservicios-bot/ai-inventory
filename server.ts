@@ -540,8 +540,18 @@ app.post("/api/config/gemini-key", async (req, res) => {
     });
   } catch (err: any) {
     console.error("Error testing Gemini key:", err);
+    let cleanMessage = err.message || "Clave no válida o sin permisos";
+    try {
+      if (typeof cleanMessage === 'string' && cleanMessage.includes('{')) {
+        const jsonStart = cleanMessage.indexOf('{');
+        const parsedErr = JSON.parse(cleanMessage.substring(jsonStart));
+        if (parsedErr?.error?.message) {
+          cleanMessage = parsedErr.error.message;
+        }
+      }
+    } catch (_) {}
     return res.status(400).json({
-      error: `Error al validar la API Key: ${err.message || "Clave no válida o sin permisos"}`
+      error: `Error al validar la API Key: ${cleanMessage}`
     });
   }
 });
