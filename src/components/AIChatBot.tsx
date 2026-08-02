@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AIChatMessage, Product } from '../types';
 import { BotMessageSquare, Send, Sparkles, User, RefreshCw, Package, ArrowRight } from 'lucide-react';
+import { getAIHeaders } from '../utils/aiHeaders';
 
 interface AIChatBotProps {
   products: Product[];
@@ -46,7 +47,7 @@ export const AIChatBot: React.FC<AIChatBotProps> = ({ products }) => {
     try {
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAIHeaders(),
         body: JSON.stringify({
           message: messageText,
           history: messages.map(m => ({ role: m.sender, content: m.text }))

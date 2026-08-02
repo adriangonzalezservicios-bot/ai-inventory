@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Product } from '../types';
 import { X, Camera, Sparkles, Upload, CheckCircle2, RefreshCw, DollarSign, Package, AlertCircle, ArrowRight } from 'lucide-react';
+import { getAIHeaders } from '../utils/aiHeaders';
 
 interface AICameraScannerModalProps {
   isOpen: boolean;
@@ -157,7 +158,7 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
 
       const res = await fetch('/api/ai/analyze-image', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAIHeaders(),
         body: JSON.stringify({ image: compressedImage })
       });
 

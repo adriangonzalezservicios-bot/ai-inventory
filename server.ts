@@ -476,14 +476,84 @@ function getStockStatus(stock: number, minStock: number): "in_stock" | "low_stoc
   return "in_stock";
 }
 
-// Lazy Gemini API getter
-let aiClient: GoogleGenAI | null = null;
-function getGeminiClient(): GoogleGenAI | null {
-  if (!aiClient && process.env.GEMINI_API_KEY) {
-    aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Custom runtime Gemini API key state
+let customRuntimeGeminiKey: string | null = null;
+
+function getGeminiClient(reqOrKey?: express.Request | string): GoogleGenAI | null {
+  let apiKey: string | undefined = undefined;
+
+  if (typeof reqOrKey === "string" && reqOrKey.trim()) {
+    apiKey = reqOrKey.trim();
+  } else if (reqOrKey && typeof reqOrKey === "object") {
+    const headerKey = reqOrKey.headers?.["x-gemini-api-key"] as string | undefined;
+    const bodyKey = reqOrKey.body?.customApiKey as string | undefined;
+    apiKey = headerKey?.trim() || bodyKey?.trim();
   }
-  return aiClient;
+
+  apiKey = apiKey || customRuntimeGeminiKey || process.env.GEMINI_API_KEY;
+
+  if (apiKey) {
+    try {
+      return new GoogleGenAI({ apiKey });
+    } catch (e) {
+      console.error("Error instantiating GoogleGenAI client:", e);
+    }
+  }
+  return null;
 }
+
+// Config endpoints for Gemini API key
+app.post("/api/config/gemini-key", async (req, res) => {
+  try {
+    const { apiKey } = req.body;
+    if (!apiKey || typeof apiKey !== "string" || !apiKey.trim()) {
+      customRuntimeGeminiKey = null;
+      return res.json({
+        success: true,
+        message: "API Key personalizada eliminada. Usando clave por defecto del servidor si existe.",
+        isConfigured: !!process.env.GEMINI_API_KEY,
+        isCustom: false
+      });
+    }
+
+    const testKey = apiKey.trim();
+    const testAi = new GoogleGenAI({ apiKey: testKey });
+
+    // Test Gemini API with a minimal prompt
+    const testResponse = await testAi.models.generateContent({
+      model: 'gemini-3.6-flash',
+      contents: 'Responder OK'
+    });
+
+    if (testResponse && testResponse.text) {
+      customRuntimeGeminiKey = testKey;
+      return res.json({
+        success: true,
+        message: "API Key de Gemini verificada y configurada correctamente.",
+        isConfigured: true,
+        isCustom: true
+      });
+    }
+
+    return res.status(400).json({
+      error: "La clave no retornó respuesta de Gemini. Verifica la API key en Google AI Studio."
+    });
+  } catch (err: any) {
+    console.error("Error testing Gemini key:", err);
+    return res.status(400).json({
+      error: `Error al validar la API Key: ${err.message || "Clave no válida o sin permisos"}`
+    });
+  }
+});
+
+app.get("/api/config/gemini-key", (req, res) => {
+  const client = getGeminiClient(req);
+  res.json({
+    isConfigured: !!client,
+    isCustom: !!customRuntimeGeminiKey || !!(req.headers["x-gemini-api-key"]),
+    hasServerKey: !!process.env.GEMINI_API_KEY
+  });
+});
 
 // API Routes
 app.get("/api/health", (req, res) => {
@@ -492,7 +562,7 @@ app.get("/api/health", (req, res) => {
     app: "AKARI Import - Control de Stock en Vivo con Google Sheets",
     sheetsConnected: true,
     spreadsheetId: "1N8PfteP7mt4KtEZlUFwGfLUND21Jzd8XZbWMnRsMhKM",
-    geminiConfigured: !!process.env.GEMINI_API_KEY
+    geminiConfigured: !!getGeminiClient(req)
   });
 });
 
@@ -652,7 +722,7 @@ app.post("/api/drive/export-backup", (req, res) => {
 // POST AI Analyze Stock with Gemini 3.6 Flash
 app.post("/api/ai/analyze-stock", async (req, res) => {
   try {
-    const ai = getGeminiClient();
+    const ai = getGeminiClient(req);
 
     const summary = localProducts.map(p => 
       `- SKU: ${p.sku} | Nombre: ${p.name} | Categ: ${p.category} | Stock actual: ${p.stock} | Stock Min: ${p.minStock} | Precio: $${p.price}`
@@ -757,7 +827,7 @@ Responde ÚNICAMENTE en formato JSON plano sin bloques de marcado markdown extra
 app.post("/api/ai/optimize-product", async (req, res) => {
   try {
     const { sku, productName, category, features } = req.body;
-    const ai = getGeminiClient();
+    const ai = getGeminiClient(req);
 
     if (ai) {
       const prompt = `Eres un experto copywriter de e-commerce para AKARI Import (electro & home).
@@ -816,7 +886,7 @@ app.post("/api/ai/analyze-image", async (req, res) => {
       return res.status(400).json({ error: "Se requiere la imagen para el análisis" });
     }
 
-    const ai = getGeminiClient();
+    const ai = getGeminiClient(req);
 
     if (ai) {
       try {
@@ -984,7 +1054,7 @@ app.post("/api/sheets/edit-product", (req, res) => {
 app.post("/api/ai/chat", async (req, res) => {
   try {
     const { message } = req.body;
-    const ai = getGeminiClient();
+    const ai = getGeminiClient(req);
 
     const stockSummary = localProducts.map(p => `${p.sku} - ${p.name} (Stock: ${p.stock}, Precio: $${p.price})`).join("; ");
 

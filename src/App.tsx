@@ -11,6 +11,7 @@ import { AddProductModal } from './components/AddProductModal';
 import { EditProductModal } from './components/EditProductModal';
 import { AICameraScannerModal } from './components/AICameraScannerModal';
 import { BarcodeScannerModal } from './components/BarcodeScannerModal';
+import { GeminiKeyConfigModal } from './components/GeminiKeyConfigModal';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
 import { INITIAL_PRODUCTS, INITIAL_MOVEMENTS } from './data/initialStock';
 
@@ -39,6 +40,7 @@ export default function App() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAICameraOpen, setIsAICameraOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isGeminiKeyModalOpen, setIsGeminiKeyModalOpen] = useState(false);
   const [selectedProductForSEO, setSelectedProductForSEO] = useState<Product | null>(null);
 
   // Sync Activity Logs
@@ -284,6 +286,7 @@ export default function App() {
         onOpenScanner={() => setIsScannerOpen(true)}
         onOpenAICamera={() => setIsAICameraOpen(true)}
         onRunAIAudit={() => setActiveTab('ai-insights')}
+        onOpenGeminiKeyModal={() => setIsGeminiKeyModalOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         spreadsheetId={sheetConfig.spreadsheetId}
@@ -377,6 +380,11 @@ export default function App() {
         onClose={() => setIsScannerOpen(false)}
         products={products}
         onUpdateStock={handleUpdateStock}
+      />
+
+      <GeminiKeyConfigModal
+        isOpen={isGeminiKeyModalOpen}
+        onClose={() => setIsGeminiKeyModalOpen(false)}
       />
 
     </div>
