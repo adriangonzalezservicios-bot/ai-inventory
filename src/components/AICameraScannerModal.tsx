@@ -162,10 +162,14 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
 
       if (!res.ok) {
         const textErr = await res.text();
-        let errorMsg = `Error del servidor (${res.status})`;
+        let errorMsg = `No se pudo procesar la solicitud (${res.status})`;
         try {
           const parsed = JSON.parse(textErr);
-          if (parsed.error) errorMsg = parsed.error;
+          if (typeof parsed.error === 'string') {
+            errorMsg = parsed.error;
+          } else if (parsed.error && typeof parsed.error.message === 'string') {
+            errorMsg = parsed.error.message;
+          }
         } catch (_) {}
         throw new Error(errorMsg);
       }
