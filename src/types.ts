@@ -6,7 +6,9 @@ export interface Product {
   brand: string;
   stock: number;
   minStock: number;
-  price: number;
+  price: number; // Precio Minorista
+  wholesalePrice?: number; // Precio Mayorista
+  retailPrice?: number; // Alias para Precio Minorista
   cost: number;
   supplier: string;
   location: string;

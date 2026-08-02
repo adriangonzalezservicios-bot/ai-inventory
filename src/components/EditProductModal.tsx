@@ -36,6 +36,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
       category: formData.category || 'General',
       brand: formData.brand || 'AKARI',
       price: Number(formData.price) || 0,
+      wholesalePrice: Number(formData.wholesalePrice) || Math.round((Number(formData.price) || 0) * 0.75),
       cost: Number(formData.cost) || 0,
       stock: Number(formData.stock) || 0,
       minStock: Number(formData.minStock) || 5,
@@ -129,20 +130,31 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
           </div>
 
           {/* Pricing & Stock controls */}
-          <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl grid grid-cols-2 sm:grid-cols-5 gap-3">
             <div>
-              <label className="block text-[#93b65e] font-bold mb-1">Precio Venta ($ ARS)</label>
+              <label className="block text-[#93b65e] font-bold mb-1 text-[11px]">Minorista ($)</label>
               <input
                 type="number"
                 min="0"
                 value={formData.price ?? 0}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                className="w-full bg-slate-900 border border-[#83a456] rounded-lg p-2 text-white font-bold text-sm focus:ring-2 focus:ring-[#83a456]"
+                className="w-full bg-slate-900 border border-[#83a456] rounded-lg p-2 text-white font-bold text-xs focus:ring-2 focus:ring-[#83a456]"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Costo ($ ARS)</label>
+              <label className="block text-amber-400 font-bold mb-1 text-[11px]">Mayorista ($)</label>
+              <input
+                type="number"
+                min="0"
+                value={formData.wholesalePrice ?? Math.round((formData.price ?? 0) * 0.75)}
+                onChange={(e) => setFormData({ ...formData, wholesalePrice: Number(e.target.value) })}
+                className="w-full bg-slate-900 border border-amber-500/50 rounded-lg p-2 text-amber-200 font-bold text-xs focus:ring-2 focus:ring-amber-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-semibold mb-1 text-[11px]">Costo ($)</label>
               <input
                 type="number"
                 min="0"
@@ -153,7 +165,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Stock Actual</label>
+              <label className="block text-slate-300 font-semibold mb-1 text-[11px]">Stock Actual</label>
               <input
                 type="number"
                 min="0"
@@ -164,7 +176,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Stock Mínimo</label>
+              <label className="block text-slate-300 font-semibold mb-1 text-[11px]">Stock Mínimo</label>
               <input
                 type="number"
                 min="1"

@@ -166,7 +166,7 @@ export const StockList: React.FC<StockListProps> = ({
                   <th className="px-4 py-3">Categoría</th>
                   <th className="px-4 py-3">Ubicación</th>
                   <th className="px-4 py-3 text-center">Stock</th>
-                  <th className="px-4 py-3 text-right">Precio Venta</th>
+                  <th className="px-4 py-3 text-right">Precios (Min / May)</th>
                   <th className="px-4 py-3 text-center">Estado</th>
                   <th className="px-4 py-3 text-right">Acciones</th>
                 </tr>
@@ -262,9 +262,16 @@ export const StockList: React.FC<StockListProps> = ({
                         </p>
                       </td>
 
-                      {/* Price */}
-                      <td className="px-4 py-3 text-right font-semibold text-white">
-                        ${product.price.toLocaleString('es-AR')}
+                      {/* Price Minorista & Mayorista */}
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <div className="font-semibold text-white">
+                          <span className="text-[10px] text-slate-400 font-normal mr-1">Min:</span>
+                          ${product.price.toLocaleString('es-AR')}
+                        </div>
+                        <div className="text-[11px] font-medium text-amber-400 mt-0.5">
+                          <span className="text-[10px] text-amber-500/80 font-normal mr-1">May:</span>
+                          ${(product.wholesalePrice || Math.round(product.price * 0.75)).toLocaleString('es-AR')}
+                        </div>
                       </td>
 
                       {/* Status */}
@@ -342,8 +349,18 @@ export const StockList: React.FC<StockListProps> = ({
 
               <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] text-slate-400">Precio</p>
-                  <p className="text-sm font-bold text-white">${product.price.toLocaleString('es-AR')}</p>
+                  <div className="flex items-center space-x-2">
+                    <div>
+                      <p className="text-[9px] text-slate-400 uppercase tracking-wider">Minorista</p>
+                      <p className="text-xs font-bold text-white">${product.price.toLocaleString('es-AR')}</p>
+                    </div>
+                    <div className="pl-2 border-l border-slate-800">
+                      <p className="text-[9px] text-amber-400 uppercase tracking-wider">Mayorista</p>
+                      <p className="text-xs font-bold text-amber-300">
+                        ${(product.wholesalePrice || Math.round(product.price * 0.75)).toLocaleString('es-AR')}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-1.5">

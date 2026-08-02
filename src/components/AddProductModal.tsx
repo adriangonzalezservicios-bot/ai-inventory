@@ -15,6 +15,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClos
   const [stock, setStock] = useState('10');
   const [minStock, setMinStock] = useState('5');
   const [price, setPrice] = useState('29990');
+  const [wholesalePrice, setWholesalePrice] = useState('22490');
   const [cost, setCost] = useState('14500');
   const [supplier, setSupplier] = useState('AKARI Import Direct');
   const [location, setLocation] = useState('Depósito Central - Estante 1');
@@ -33,6 +34,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClos
       stock: parseInt(stock, 10) || 0,
       minStock: parseInt(minStock, 10) || 5,
       price: parseFloat(price) || 0,
+      wholesalePrice: parseFloat(wholesalePrice) || Math.round((parseFloat(price) || 0) * 0.75),
       cost: parseFloat(cost) || 0,
       supplier: supplier.trim(),
       location: location.trim(),
@@ -122,15 +124,32 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClos
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Precio de Venta ($ ARS)</label>
+              <label className="block text-slate-300 font-semibold mb-1">Precio Minorista ($)</label>
               <input
                 type="number"
                 min="0"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs focus:ring-2 focus:ring-red-500 focus:outline-none"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPrice(val);
+                  if (val && !isNaN(Number(val))) {
+                    setWholesalePrice(Math.round(Number(val) * 0.75).toString());
+                  }
+                }}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs focus:ring-2 focus:ring-[#83a456] focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-amber-400 font-semibold mb-1">Precio Mayorista ($)</label>
+              <input
+                type="number"
+                min="0"
+                value={wholesalePrice}
+                onChange={(e) => setWholesalePrice(e.target.value)}
+                className="w-full bg-slate-950 border border-amber-500/50 rounded-lg p-2.5 text-amber-200 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none"
               />
             </div>
 
@@ -141,7 +160,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClos
                 min="0"
                 value={cost}
                 onChange={(e) => setCost(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs focus:ring-2 focus:ring-red-500 focus:outline-none"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs focus:ring-2 focus:ring-slate-500 focus:outline-none"
               />
             </div>
           </div>

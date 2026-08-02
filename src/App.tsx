@@ -231,9 +231,9 @@ export default function App() {
   // Direct Local CSV Download handler for mobile and desktop
   const handleDownloadCSVLocal = () => {
     try {
-      const headers = "SKU,Nombre,Categoria,Stock,StockMin,Precio,Costo,Estado,UltimaActualizacion\n";
+      const headers = "SKU,Nombre,Categoria,Stock,StockMin,Precio Minorista,Precio Mayorista,Costo,Estado,UltimaActualizacion\n";
       const rows = products.map(p => 
-        `"${p.sku}","${p.name.replace(/"/g, '""')}","${p.category}",${p.stock},${p.minStock},${p.price},${p.cost},"${p.status}","${p.lastUpdated}"`
+        `"${p.sku}","${p.name.replace(/"/g, '""')}","${p.category}",${p.stock},${p.minStock},${p.price},${p.wholesalePrice || Math.round(p.price * 0.75)},${p.cost},"${p.status}","${p.lastUpdated}"`
       ).join("\n");
       const csvContent = headers + rows;
       

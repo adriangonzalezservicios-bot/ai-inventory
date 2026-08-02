@@ -23,6 +23,7 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
     brand: string;
     description: string;
     price: number;
+    wholesalePrice?: number;
     cost: number;
     stock: number;
     minStock: number;
@@ -198,6 +199,7 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
       category: analyzedResult.category || 'Electro & Home',
       brand: analyzedResult.brand || 'AKARI',
       price: Number(analyzedResult.price) || 0,
+      wholesalePrice: Number(analyzedResult.wholesalePrice) || Math.round((Number(analyzedResult.price) || 0) * 0.75),
       cost: Number(analyzedResult.cost) || 0,
       stock: Number(analyzedResult.stock) || 10,
       minStock: Number(analyzedResult.minStock) || 5,
@@ -468,20 +470,31 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
                   <span>Definir Precio de Venta & Costo Estimado</span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Precio Venta ($ ARS)</label>
+                    <label className="block text-slate-300 font-semibold mb-1 text-[11px]">Precio Minorista ($)</label>
                     <input
                       type="number"
                       min="0"
                       value={analyzedResult.price}
                       onChange={(e) => setAnalyzedResult({ ...analyzedResult, price: Number(e.target.value) })}
-                      className="w-full bg-slate-900 border border-[#83a456] rounded-lg p-2 text-white font-bold text-sm focus:ring-2 focus:ring-[#83a456]"
+                      className="w-full bg-slate-900 border border-[#83a456] rounded-lg p-2 text-white font-bold text-xs focus:ring-2 focus:ring-[#83a456]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Costo ($ ARS)</label>
+                    <label className="block text-amber-400 font-semibold mb-1 text-[11px]">Precio Mayorista ($)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={analyzedResult.wholesalePrice ?? Math.round(analyzedResult.price * 0.75)}
+                      onChange={(e) => setAnalyzedResult({ ...analyzedResult, wholesalePrice: Number(e.target.value) })}
+                      className="w-full bg-slate-900 border border-amber-500/50 rounded-lg p-2 text-amber-200 font-bold text-xs focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1 text-[11px]">Costo ($)</label>
                     <input
                       type="number"
                       min="0"
@@ -492,7 +505,7 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Stock Inicial</label>
+                    <label className="block text-slate-300 font-semibold mb-1 text-[11px]">Stock Inicial</label>
                     <input
                       type="number"
                       min="0"
@@ -503,7 +516,7 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Stock Mínimo</label>
+                    <label className="block text-slate-300 font-semibold mb-1 text-[11px]">Stock Mínimo</label>
                     <input
                       type="number"
                       min="1"

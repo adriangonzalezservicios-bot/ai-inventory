@@ -403,6 +403,10 @@ async function syncFromGoogleSheets(spreadsheetId: string) {
       const rawPrice = (row[priceIdx] || "0").replace(/^"+|"+$/g, "").replace(/,/g, "");
       const price = parseFloat(rawPrice) || 0;
 
+      const wholesalePriceIdx = headers.findIndex(h => h.toLowerCase().includes("wholesale") || h.toLowerCase().includes("mayorista"));
+      const rawWholesale = wholesalePriceIdx !== -1 ? (row[wholesalePriceIdx] || "0").replace(/^"+|"+$/g, "").replace(/,/g, "") : "0";
+      const wholesalePrice = parseFloat(rawWholesale) || Math.round(price * 0.75);
+
       const rawCost = (row[costIdx] || "0").replace(/^"+|"+$/g, "").replace(/,/g, "");
       const cost = parseFloat(rawCost) || Math.round(price * 0.5);
 
@@ -441,6 +445,7 @@ async function syncFromGoogleSheets(spreadsheetId: string) {
         stock: existing ? existing.stock : stock,
         minStock: existing ? existing.minStock : minStock,
         price,
+        wholesalePrice,
         cost,
         supplier: "AKARI Import Direct",
         location: `Depósito Central - Estante ${i}`,
@@ -578,6 +583,7 @@ app.post("/api/sheets/add-product", (req, res) => {
     stock: stock,
     minStock: minStock,
     price: Number(newProductData.price) || 0,
+    wholesalePrice: Number(newProductData.wholesalePrice) || Math.round((Number(newProductData.price) || 0) * 0.75),
     cost: Number(newProductData.cost) || 0,
     supplier: newProductData.supplier || "AKARI Import Direct",
     location: newProductData.location || "Depósito Principal",
@@ -623,9 +629,9 @@ app.post("/api/drive/export-backup", (req, res) => {
   const backupId = `AKARI_Stock_Backup_${new Date().toISOString().replace(/[:.]/g, "-")}.csv`;
   
   // Format CSV content
-  const headers = "SKU,Nombre,Categoria,Stock,StockMin,Precio,Costo,Estado,UltimaActualizacion\n";
+  const headers = "SKU,Nombre,Categoria,Stock,StockMin,PrecioMinorista,PrecioMayorista,Costo,Estado,UltimaActualizacion\n";
   const rows = localProducts.map(p => 
-    `"${p.sku}","${p.name.replace(/"/g, '""')}","${p.category}",${p.stock},${p.minStock},${p.price},${p.cost},"${p.status}","${p.lastUpdated}"`
+    `"${p.sku}","${p.name.replace(/"/g, '""')}","${p.category}",${p.stock},${p.minStock},${p.price},${p.wholesalePrice || Math.round(p.price * 0.75)},${p.cost},"${p.status}","${p.lastUpdated}"`
   ).join("\n");
   const csvData = headers + rows;
 
@@ -830,6 +836,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura:
   "brand": "AKARI / Gadnic",
   "description": "Especificaciones técnicas y beneficios del producto.",
   "price": 28000,
+  "wholesalePrice": 21000,
   "cost": 14000,
   "stock": 10,
   "minStock": 5,
@@ -891,6 +898,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura:
         brand: randomProduct.brand || "AKARI / Gadnic",
         description: randomProduct.description || "Ficha técnica aproximada escaneada desde la imagen.",
         price: randomProduct.price || 28000,
+        wholesalePrice: randomProduct.wholesalePrice || Math.round((randomProduct.price || 28000) * 0.75),
         cost: randomProduct.cost || 14000,
         stock: randomProduct.stock || 5,
         minStock: randomProduct.minStock || 5,
