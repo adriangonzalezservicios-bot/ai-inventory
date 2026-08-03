@@ -494,7 +494,14 @@ function getGeminiClient(reqOrKey?: express.Request | string): GoogleGenAI | nul
 
   if (apiKey) {
     try {
-      return new GoogleGenAI({ apiKey });
+      return new GoogleGenAI({ 
+        apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build'
+          }
+        }
+      });
     } catch (e) {
       console.error("Error instantiating GoogleGenAI client:", e);
     }
@@ -517,7 +524,14 @@ app.post("/api/config/gemini-key", async (req, res) => {
     }
 
     const testKey = apiKey.trim();
-    const testAi = new GoogleGenAI({ apiKey: testKey });
+    const testAi = new GoogleGenAI({ 
+      apiKey: testKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build'
+        }
+      }
+    });
 
     // Test Gemini API with a minimal prompt
     const testResponse = await testAi.models.generateContent({
