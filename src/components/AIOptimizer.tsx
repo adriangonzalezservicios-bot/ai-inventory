@@ -86,7 +86,7 @@ export const AIOptimizer: React.FC<AIOptimizerProps> = ({
           <div>
             <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30 mb-2">
               <Sparkles className="w-3.5 h-3.5 mr-1.5 text-yellow-300 animate-pulse" />
-              Motor de Predicción Claude IA
+              Motor de Predicción Gemini 3.6 Flash
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
               Optimización Predictiva & Auditoría Inteligente de Inventario
@@ -270,7 +270,7 @@ export const AIOptimizer: React.FC<AIOptimizerProps> = ({
               className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs flex items-center justify-center space-x-2 shadow-md cursor-pointer"
             >
               <Sparkles className={`w-4 h-4 ${generatingSEO ? 'animate-spin' : ''}`} />
-              <span>{generatingSEO ? 'Generando Copys con Claude...' : 'Generar Ficha Técnica Optimizada'}</span>
+              <span>{generatingSEO ? 'Generando Copys con Gemini...' : 'Generar Ficha Técnica Optimizada'}</span>
             </button>
           </div>
         </div>

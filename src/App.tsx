@@ -11,7 +11,7 @@ import { AddProductModal } from './components/AddProductModal';
 import { EditProductModal } from './components/EditProductModal';
 import { AICameraScannerModal } from './components/AICameraScannerModal';
 import { BarcodeScannerModal } from './components/BarcodeScannerModal';
-import { ClaudeKeyConfigModal } from './components/ClaudeKeyConfigModal';
+import { GeminiKeyConfigModal } from './components/GeminiKeyConfigModal';
 import { PDFReportModal } from './components/PDFReportModal';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
 import { INITIAL_PRODUCTS, INITIAL_MOVEMENTS } from './data/initialStock';
@@ -41,7 +41,7 @@ export default function App() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAICameraOpen, setIsAICameraOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [isClaudeKeyModalOpen, setIsClaudeKeyModalOpen] = useState(false);
+  const [isGeminiKeyModalOpen, setIsGeminiKeyModalOpen] = useState(false);
   const [isPDFReportModalOpen, setIsPDFReportModalOpen] = useState(false);
   const [selectedProductForSEO, setSelectedProductForSEO] = useState<Product | null>(null);
 
@@ -288,7 +288,7 @@ export default function App() {
         onOpenScanner={() => setIsScannerOpen(true)}
         onOpenAICamera={() => setIsAICameraOpen(true)}
         onRunAIAudit={() => setActiveTab('ai-insights')}
-        onOpenClaudeKeyModal={() => setIsClaudeKeyModalOpen(true)}
+        onOpenGeminiKeyModal={() => setIsGeminiKeyModalOpen(true)}
         onOpenPDFReportModal={() => setIsPDFReportModalOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -353,7 +353,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="bg-slate-950 border-t border-slate-900 py-4 text-center text-xs text-slate-500">
-        <p>AKARI Import (electro & home) • Control de Stock PWA Multi-dispositivo • Google Sheets & Drive Sync • Claude IA</p>
+        <p>AKARI Import (electro & home) • Control de Stock PWA Multi-dispositivo • Google Sheets & Drive Sync • Gemini 3.6 Flash IA</p>
       </footer>
 
       {/* Modals */}
@@ -386,9 +386,9 @@ export default function App() {
         onUpdateStock={handleUpdateStock}
       />
 
-      <ClaudeKeyConfigModal
-        isOpen={isClaudeKeyModalOpen}
-        onClose={() => setIsClaudeKeyModalOpen(false)}
+      <GeminiKeyConfigModal
+        isOpen={isGeminiKeyModalOpen}
+        onClose={() => setIsGeminiKeyModalOpen(false)}
       />
 
       <PDFReportModal

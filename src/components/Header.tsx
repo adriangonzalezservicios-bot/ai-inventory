@@ -9,7 +9,7 @@ interface HeaderProps {
   onOpenScanner: () => void;
   onOpenAICamera: () => void;
   onRunAIAudit: () => void;
-  onOpenClaudeKeyModal: () => void;
+  onOpenGeminiKeyModal: () => void;
   onOpenPDFReportModal: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -23,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenScanner,
   onOpenAICamera,
   onRunAIAudit,
-  onOpenClaudeKeyModal,
+  onOpenGeminiKeyModal,
   onOpenPDFReportModal,
   searchQuery,
   setSearchQuery,
@@ -93,12 +93,12 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="hidden md:inline">Auditoría IA</span>
             </button>
 
-            {/* Claude API Key Config */}
+            {/* Gemini API Key Config */}
             <button
-              onClick={onOpenClaudeKeyModal}
-              id="btn-claude-key-config"
+              onClick={onOpenGeminiKeyModal}
+              id="btn-gemini-key-config"
               className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center space-x-1.5 border border-slate-700 transition cursor-pointer"
-              title="Configurar tu API Key de Claude IA"
+              title="Configurar tu API Key de Gemini IA"
             >
               <Key className="w-3.5 h-3.5 text-purple-400" />
               <span className="hidden lg:inline">API Key IA</span>

@@ -184,7 +184,7 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
       }
     } catch (err: any) {
       console.error('Error analyzing image:', err);
-      setErrorMessage(err.message || 'No se pudo procesar la imagen con Claude IA. Por favor reintenta o ingresa los datos manualmente.');
+      setErrorMessage(err.message || 'No se pudo procesar la imagen con Gemini IA. Por favor reintenta o ingresa los datos manualmente.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -232,7 +232,7 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
               <h3 className="text-base font-bold text-white flex items-center gap-1.5">
                 Cámara IA • Detección de Producto & Precio
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                  Claude IA
+                  Gemini 3.6 Flash
                 </span>
               </h3>
               <p className="text-xs text-slate-400">Escanea la foto de un producto o caja para interpretar su código, buscarlo y ponerle precio.</p>
@@ -331,7 +331,7 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
                     <div>
                       <p className="text-sm font-bold text-white">Capturar o Cargar Imagen de Producto</p>
                       <p className="text-slate-400 text-xs mt-1 max-w-md mx-auto">
-                        Toma una fotografía directamente con la cámara de tu dispositivo o selecciona una imagen de tu galería. Claude IA reconocerá el artículo y estimará el precio de mercado.
+                        Toma una fotografía directamente con la cámara de tu dispositivo o selecciona una imagen de tu galería. Gemini IA reconocerá el artículo y estimará el precio de mercado.
                       </p>
                     </div>
 
@@ -371,7 +371,7 @@ export const AICameraScannerModal: React.FC<AICameraScannerModalProps> = ({
                     {isAnalyzing ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin text-yellow-300" />
-                        <span>Analizando producto, buscando precio y especificaciones en la web con Claude IA...</span>
+                        <span>Analizando producto, buscando precio y especificaciones en la web con Gemini IA...</span>
                       </>
                     ) : (
                       <>
