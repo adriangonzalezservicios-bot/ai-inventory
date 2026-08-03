@@ -47,12 +47,12 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
             <div className="w-full h-1 bg-red-500/80 shadow-lg shadow-red-500 animate-pulse mb-2"></div>
             <Camera className="w-10 h-10 text-red-400 animate-bounce" />
             <p className="text-xs text-slate-300 font-semibold">Cámara lista para lectura rápida</p>
-            <p className="text-[11px] text-slate-500">Apunta la cámara al código SKU del producto ILI.</p>
+            <p className="text-[11px] text-slate-500">Apunta la cámara al código SKU del producto de AKARI Import.</p>
           </div>
 
           {/* Preset Quick Scan Buttons */}
           <div>
-            <label className="block text-slate-400 text-[11px] mb-1 font-semibold">Prueba rápida de escaneo de SKUs de ILI:</label>
+            <label className="block text-slate-400 text-[11px] mb-1 font-semibold">Prueba rápida de escaneo de SKUs de AKARI:</label>
             <div className="flex flex-wrap gap-1.5">
               {products.slice(0, 5).map(p => (
                 <button
@@ -74,7 +74,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
                 type="text"
                 value={scannedSKU}
                 onChange={(e) => handleScan(e.target.value)}
-                placeholder="Ej: ILI-AUD-010"
+                placeholder="Ej: AKARI-001"
                 className="flex-1 bg-slate-950 border border-slate-700 rounded-lg p-2.5 font-mono text-white text-xs focus:ring-2 focus:ring-red-500 focus:outline-none"
               />
             </div>

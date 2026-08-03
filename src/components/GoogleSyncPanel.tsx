@@ -152,13 +152,13 @@ export const GoogleSyncPanel: React.FC<GoogleSyncPanelProps> = ({
             </div>
 
             <p className="text-xs text-slate-300 mt-3 leading-relaxed">
-              Exporta copias de seguridad estables de todo el inventario de ILI directamente a tu unidad de Google Drive. Puedes restaurar o auditar movimientos en cualquier momento.
+              Exporta copias de seguridad estables de todo el inventario de AKARI Import directamente a tu unidad de Google Drive. Puedes restaurar o auditar movimientos en cualquier momento.
             </p>
 
             <div className="mt-4 bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
               <div className="flex items-center justify-between text-xs text-slate-300">
                 <span>Carpeta de Resguardos:</span>
-                <span className="font-semibold text-purple-300">Google Drive / ILI_Backups_Stock</span>
+                <span className="font-semibold text-purple-300">Google Drive / AKARI_Backups_Stock</span>
               </div>
               <div className="flex items-center justify-between text-xs text-slate-300">
                 <span>Formato de Resguardo:</span>

@@ -12,7 +12,7 @@ export const AIChatBot: React.FC<AIChatBotProps> = ({ products }) => {
     {
       id: 'msg-1',
       sender: 'assistant',
-      text: '¡Hola! Soy ILI Bot, tu Asistente Inteligente de Inventario y Operaciones. Estoy vinculado con tu catálogo y Hoja de Cálculo (Google Sheets ID: 1N8PfteP7mt4KtEZlUFwGfLUND21Jzd8XZbWMnRsMhKM). ¿En qué puedo ayudarte hoy?',
+      text: '¡Hola! Soy AKARI Bot, tu Asistente Inteligente de Inventario y Operaciones. Estoy vinculado con tu catálogo y Hoja de Cálculo (Google Sheets ID: 1N8PfteP7mt4KtEZlUFwGfLUND21Jzd8XZbWMnRsMhKM). ¿En qué puedo ayudarte hoy?',
       timestamp: new Date().toISOString()
     }
   ]);
@@ -81,7 +81,7 @@ export const AIChatBot: React.FC<AIChatBotProps> = ({ products }) => {
 
   const quickPrompts = [
     "¿Qué productos de Audio están en riesgo de stock?",
-    "¿Cuál es el valor total del inventario ILI?",
+    "¿Cuál es el valor total del inventario AKARI Import?",
     "Recomendar reorden para cargadores GaN",
     "¿Cómo exportar respaldo a Google Drive?"
   ];
@@ -96,7 +96,7 @@ export const AIChatBot: React.FC<AIChatBotProps> = ({ products }) => {
             <BotMessageSquare className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">Asistente Virtual de Inventario ILI</h3>
+            <h3 className="text-sm font-bold text-white">Asistente Virtual de Inventario AKARI</h3>
             <p className="text-[11px] text-slate-400">Potenciado por Gemini 2.5 Flash • Contexto en vivo de Google Sheets</p>
           </div>
         </div>
@@ -144,7 +144,7 @@ export const AIChatBot: React.FC<AIChatBotProps> = ({ products }) => {
         {loading && (
           <div className="flex items-center space-x-2 text-xs text-slate-400">
             <RefreshCw className="w-4 h-4 text-purple-400 animate-spin" />
-            <span>ILI Bot está analizando tu consulta...</span>
+            <span>AKARI Bot está analizando tu consulta...</span>
           </div>
         )}
         <div ref={messagesEndRef} />

@@ -95,7 +95,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClos
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ej: Parlante Portátil ILI SoundBox RGB"
+              placeholder="Ej: Parlante Portátil AKARI SoundBox RGB"
               className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-xs focus:ring-2 focus:ring-red-500 focus:outline-none"
             />
           </div>

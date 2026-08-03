@@ -92,7 +92,7 @@ export const AIOptimizer: React.FC<AIOptimizerProps> = ({
               Optimización Predictiva & Auditoría Inteligente de Inventario
             </h2>
             <p className="text-sm text-slate-300 max-w-2xl mt-1">
-              Anticipa quiebres de stock, optimiza órdenes de compra a proveedores y maximiza el margen de ventas para tu catálogo en ili.com.ar.
+              Anticipa quiebres de stock, optimiza órdenes de compra a proveedores y maximiza el margen de ventas para tu catálogo en AKARI Import.
             </p>
           </div>
 
@@ -140,7 +140,7 @@ export const AIOptimizer: React.FC<AIOptimizerProps> = ({
                 </div>
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white">Salud del Inventario ILI</h4>
+                <h4 className="text-sm font-bold text-white">Salud del Inventario AKARI</h4>
                 <p className="text-xs text-slate-400 mt-1">Puntuación calculada en tiempo real según niveles de seguridad y margen.</p>
               </div>
             </div>
@@ -234,7 +234,7 @@ export const AIOptimizer: React.FC<AIOptimizerProps> = ({
       ) : (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center text-slate-400">
           <Sparkles className="w-10 h-10 text-purple-400 mx-auto mb-2 animate-bounce" />
-          <p className="text-sm text-slate-300 font-medium">Haz clic en "Ejecutar Auditoría con IA" para calcular predicciones y reordenamiento óptimo para ILI.</p>
+          <p className="text-sm text-slate-300 font-medium">Haz clic en "Ejecutar Auditoría con IA" para calcular predicciones y reordenamiento óptimo para AKARI Import.</p>
         </div>
       )}
 
@@ -242,7 +242,7 @@ export const AIOptimizer: React.FC<AIOptimizerProps> = ({
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl">
         <div className="flex items-center space-x-2 mb-4">
           <Zap className="w-5 h-5 text-yellow-400" />
-          <h3 className="text-base font-bold text-white">Generador de Ficha Técnica & SEO con IA (ili.com.ar)</h3>
+          <h3 className="text-base font-bold text-white">Generador de Ficha Técnica & SEO con IA (AKARI Import)</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
