@@ -70,7 +70,7 @@ export const AIChatBot: React.FC<AIChatBotProps> = ({ products }) => {
         {
           id: `bot-err-${Date.now()}`,
           sender: 'assistant',
-          text: 'Ocurrió un inconveniente al conectar con Gemini AI. Intenta de nuevo.',
+          text: 'Ocurrió un inconveniente al conectar con Claude AI. Intenta de nuevo.',
           timestamp: new Date().toISOString()
         }
       ]);
@@ -97,7 +97,7 @@ export const AIChatBot: React.FC<AIChatBotProps> = ({ products }) => {
           </div>
           <div>
             <h3 className="text-sm font-bold text-white">Asistente Virtual de Inventario AKARI</h3>
-            <p className="text-[11px] text-slate-400">Potenciado por Gemini 2.5 Flash • Contexto en vivo de Google Sheets</p>
+            <p className="text-[11px] text-slate-400">Potenciado por Claude IA • Contexto en vivo de Google Sheets</p>
           </div>
         </div>
 

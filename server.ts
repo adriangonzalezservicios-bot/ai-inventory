@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
 
 const app = express();
 const PORT = 3000;
@@ -476,106 +475,116 @@ function getStockStatus(stock: number, minStock: number): "in_stock" | "low_stoc
   return "in_stock";
 }
 
-// Custom runtime Gemini API key state
-let customRuntimeGeminiKey: string | null = null;
+// Custom runtime Claude (Anthropic) API key state
+let customRuntimeClaudeKey: string | null = null;
+const CLAUDE_MODEL = "claude-sonnet-5";
 
-function getGeminiClient(reqOrKey?: express.Request | string): GoogleGenAI | null {
+function getClaudeApiKey(reqOrKey?: express.Request | string): string | null {
   let apiKey: string | undefined = undefined;
 
   if (typeof reqOrKey === "string" && reqOrKey.trim()) {
     apiKey = reqOrKey.trim();
   } else if (reqOrKey && typeof reqOrKey === "object") {
-    const headerKey = reqOrKey.headers?.["x-gemini-api-key"] as string | undefined;
+    const headerKey = reqOrKey.headers?.["x-claude-api-key"] as string | undefined;
     const bodyKey = reqOrKey.body?.customApiKey as string | undefined;
     apiKey = headerKey?.trim() || bodyKey?.trim();
   }
 
-  apiKey = apiKey || customRuntimeGeminiKey || process.env.GEMINI_API_KEY;
-
-  if (apiKey) {
-    try {
-      return new GoogleGenAI({ 
-        apiKey,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build'
-          }
-        }
-      });
-    } catch (e) {
-      console.error("Error instantiating GoogleGenAI client:", e);
-    }
-  }
-  return null;
+  apiKey = apiKey || customRuntimeClaudeKey || process.env.ANTHROPIC_API_KEY;
+  return apiKey && apiKey.trim() ? apiKey.trim() : null;
 }
 
-// Config endpoints for Gemini API key
-app.post("/api/config/gemini-key", async (req, res) => {
+// Minimal wrapper around the Anthropic Messages API (no SDK dependency required)
+async function callClaude(apiKey: string, opts: {
+  system?: string;
+  messages: Array<{ role: "user" | "assistant"; content: any }>;
+  maxTokens?: number;
+}): Promise<string> {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01"
+    },
+    body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: opts.maxTokens || 1500,
+      system: opts.system,
+      messages: opts.messages
+    })
+  });
+
+  const data: any = await response.json();
+
+  if (!response.ok) {
+    const message = data?.error?.message || `Error de la API de Claude (${response.status})`;
+    throw new Error(message);
+  }
+
+  const textBlock = (data.content || []).find((b: any) => b.type === "text");
+  return textBlock?.text || "";
+}
+
+// Extracts a JSON object from Claude's text response, tolerating stray markdown fences
+function extractJson(text: string): any {
+  let cleaned = text.trim();
+  cleaned = cleaned.replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```\s*$/, "");
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+  if (firstBrace !== -1 && lastBrace !== -1) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+  }
+  return JSON.parse(cleaned);
+}
+
+// Config endpoints for Claude (Anthropic) API key
+app.post("/api/config/claude-key", async (req, res) => {
   try {
     const { apiKey } = req.body;
     if (!apiKey || typeof apiKey !== "string" || !apiKey.trim()) {
-      customRuntimeGeminiKey = null;
+      customRuntimeClaudeKey = null;
       return res.json({
         success: true,
         message: "API Key personalizada eliminada. Usando clave por defecto del servidor si existe.",
-        isConfigured: !!process.env.GEMINI_API_KEY,
+        isConfigured: !!process.env.ANTHROPIC_API_KEY,
         isCustom: false
       });
     }
 
     const testKey = apiKey.trim();
-    const testAi = new GoogleGenAI({ 
-      apiKey: testKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build'
-        }
-      }
+    const testText = await callClaude(testKey, {
+      messages: [{ role: "user", content: "Responder OK" }],
+      maxTokens: 10
     });
 
-    // Test Gemini API with a minimal prompt
-    const testResponse = await testAi.models.generateContent({
-      model: 'gemini-3.6-flash',
-      contents: 'Responder OK'
-    });
-
-    if (testResponse && testResponse.text) {
-      customRuntimeGeminiKey = testKey;
+    if (testText) {
+      customRuntimeClaudeKey = testKey;
       return res.json({
         success: true,
-        message: "API Key de Gemini verificada y configurada correctamente.",
+        message: "API Key de Claude verificada y configurada correctamente.",
         isConfigured: true,
         isCustom: true
       });
     }
 
     return res.status(400).json({
-      error: "La clave no retornó respuesta de Gemini. Verifica la API key en Google AI Studio."
+      error: "La clave no retornó respuesta de Claude. Verifica la API key en la consola de Anthropic."
     });
   } catch (err: any) {
-    console.error("Error testing Gemini key:", err);
-    let cleanMessage = err.message || "Clave no válida o sin permisos";
-    try {
-      if (typeof cleanMessage === 'string' && cleanMessage.includes('{')) {
-        const jsonStart = cleanMessage.indexOf('{');
-        const parsedErr = JSON.parse(cleanMessage.substring(jsonStart));
-        if (parsedErr?.error?.message) {
-          cleanMessage = parsedErr.error.message;
-        }
-      }
-    } catch (_) {}
+    console.error("Error testing Claude key:", err);
     return res.status(400).json({
-      error: `Error al validar la API Key: ${cleanMessage}`
+      error: `Error al validar la API Key: ${err.message || "Clave no válida o sin permisos"}`
     });
   }
 });
 
-app.get("/api/config/gemini-key", (req, res) => {
-  const client = getGeminiClient(req);
+app.get("/api/config/claude-key", (req, res) => {
+  const apiKey = getClaudeApiKey(req);
   res.json({
-    isConfigured: !!client,
-    isCustom: !!customRuntimeGeminiKey || !!(req.headers["x-gemini-api-key"]),
-    hasServerKey: !!process.env.GEMINI_API_KEY
+    isConfigured: !!apiKey,
+    isCustom: !!customRuntimeClaudeKey || !!(req.headers["x-claude-api-key"]),
+    hasServerKey: !!process.env.ANTHROPIC_API_KEY
   });
 });
 
@@ -586,7 +595,7 @@ app.get("/api/health", (req, res) => {
     app: "AKARI Import - Control de Stock en Vivo con Google Sheets",
     sheetsConnected: true,
     spreadsheetId: "1N8PfteP7mt4KtEZlUFwGfLUND21Jzd8XZbWMnRsMhKM",
-    geminiConfigured: !!getGeminiClient(req)
+    claudeConfigured: !!getClaudeApiKey(req)
   });
 });
 
@@ -743,16 +752,16 @@ app.post("/api/drive/export-backup", (req, res) => {
   });
 });
 
-// POST AI Analyze Stock with Gemini 3.6 Flash
+// POST AI Analyze Stock with Claude
 app.post("/api/ai/analyze-stock", async (req, res) => {
   try {
-    const ai = getGeminiClient(req);
+    const apiKey = getClaudeApiKey(req);
 
     const summary = localProducts.map(p => 
       `- SKU: ${p.sku} | Nombre: ${p.name} | Categ: ${p.category} | Stock actual: ${p.stock} | Stock Min: ${p.minStock} | Precio: $${p.price}`
     ).join("\n");
 
-    if (ai) {
+    if (apiKey) {
       try {
         const prompt = `Eres el Director de Operaciones e Inteligencia de Inventario para AKARI Import (electro & home / gadgets).
 Analiza los siguientes productos del catálogo real de la tienda cargados desde Google Sheets:
@@ -793,19 +802,13 @@ Por favor, realiza una auditoría completa de optimización de stock en formato 
 
 Responde ÚNICAMENTE en formato JSON plano sin bloques de marcado markdown extras.`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
-          contents: prompt,
-          config: {
-            responseMimeType: 'application/json'
-          }
+        const responseText = await callClaude(apiKey, {
+          messages: [{ role: "user", content: prompt }]
         });
-
-        const responseText = response.text || "{}";
-        const parsed = JSON.parse(responseText);
+        const parsed = extractJson(responseText);
         return res.json({ success: true, aiAnalysis: parsed });
-      } catch (geminiErr: any) {
-        console.warn("Gemini analyze-stock fallback:", geminiErr.message || geminiErr);
+      } catch (claudeErr: any) {
+        console.warn("Claude analyze-stock fallback:", claudeErr.message || claudeErr);
       }
     }
 
@@ -861,9 +864,9 @@ Responde ÚNICAMENTE en formato JSON plano sin bloques de marcado markdown extra
 app.post("/api/ai/optimize-product", async (req, res) => {
   try {
     const { sku, productName, category, features } = req.body;
-    const ai = getGeminiClient(req);
+    const apiKey = getClaudeApiKey(req);
 
-    if (ai) {
+    if (apiKey) {
       try {
         const prompt = `Eres un experto copywriter de e-commerce para AKARI Import (electro & home).
 Genera una optimización completa de ficha técnica y descripción atractiva para el producto:
@@ -880,19 +883,13 @@ Devuelve un JSON con:
   "recommendedTags": ["tag1", "tag2", "tag3", "tag4"]
 }`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
-          contents: prompt,
-          config: {
-            responseMimeType: 'application/json'
-          }
+        const responseText = await callClaude(apiKey, {
+          messages: [{ role: "user", content: prompt }]
         });
-
-        const responseText = response.text || "{}";
-        const parsed = JSON.parse(responseText);
+        const parsed = extractJson(responseText);
         return res.json({ success: true, result: parsed });
-      } catch (geminiErr: any) {
-        console.warn("Gemini optimize-product fallback:", geminiErr.message || geminiErr);
+      } catch (claudeErr: any) {
+        console.warn("Claude optimize-product fallback:", claudeErr.message || claudeErr);
       }
     }
 
@@ -924,7 +921,7 @@ Devuelve un JSON con:
   }
 });
 
-// POST AI Analyze Image with Gemini 3.6 Flash Vision
+// POST AI Analyze Image with Claude Vision
 app.post("/api/ai/analyze-image", async (req, res) => {
   try {
     const { image } = req.body;
@@ -932,19 +929,25 @@ app.post("/api/ai/analyze-image", async (req, res) => {
       return res.status(400).json({ error: "Se requiere la imagen para el análisis" });
     }
 
-    const ai = getGeminiClient(req);
+    const apiKey = getClaudeApiKey(req);
 
-    if (ai) {
-      try {
-        const base64Data = image.includes(",") ? image.split(",")[1] : image;
-        const mimeMatch = image.match(/data:([^;]+);base64/);
-        const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+    if (!apiKey) {
+      // No hay API key configurada: se lo decimos claro al usuario en vez de
+      // inventar un producto al azar (eso era lo que rompía la identificación).
+      return res.status(400).json({
+        error: "No hay una API Key de Claude configurada. Configurala en el ícono de ajustes de IA para poder identificar productos con la cámara."
+      });
+    }
 
-        const prompt = `Eres el especialista en identificación visual e inteligencia de catálogo e-commerce para AKARI Import (electro & home).
-Analiza esta foto de un producto, caja o etiqueta.
-Interpreta qué producto es y genera la ficha técnica completa.
+    const base64Data = image.includes(",") ? image.split(",")[1] : image;
+    const mimeMatch = image.match(/data:([^;]+);base64/);
+    const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
 
-Devuelve ÚNICAMENTE un JSON válido con esta estructura:
+    const prompt = `Eres el especialista en identificación visual e inteligencia de catálogo e-commerce para AKARI Import (electro & home).
+Analiza esta foto de un producto, caja, etiqueta o código de barras.
+Interpreta qué producto es (usando el texto, marca, modelo o código visible) y genera la ficha técnica completa.
+
+Devuelve ÚNICAMENTE un JSON válido, sin texto adicional ni bloques de markdown, con esta estructura:
 {
   "name": "Nombre comercial en español (ej: Auricular In Ear Gadnic TW6)",
   "sku": "Ablue999",
@@ -958,89 +961,39 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura:
   "minStock": 5,
   "supplier": "AKARI Import Direct",
   "location": "Depósito Central - Estante 1"
-}`;
+}
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
-          contents: [
-            {
-              role: 'user',
-              parts: [
-                {
-                  inlineData: {
-                    data: base64Data,
-                    mimeType: mimeType
-                  }
-                },
-                { text: prompt }
-              ]
-            }
-          ],
-          config: {
-            responseMimeType: 'application/json'
+Si la imagen no permite identificar un producto real (borrosa, vacía, irrelevante), igual devuelve el mismo JSON pero con "name": "No identificado" y una "description" explicando por qué no se pudo interpretar.`;
+
+    try {
+      const responseText = await callClaude(apiKey, {
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "image",
+                source: { type: "base64", media_type: mimeType, data: base64Data }
+              },
+              { type: "text", text: prompt }
+            ]
           }
-        });
+        ]
+      });
 
-        const responseText = response.text || "{}";
-        const parsed = JSON.parse(responseText);
-        return res.json({ success: true, productInfo: parsed });
-      } catch (geminiErr: any) {
-        console.warn("Gemini Vision model warning/fallback:", geminiErr.message || geminiErr);
-      }
+      const parsed = extractJson(responseText);
+      return res.json({ success: true, productInfo: parsed });
+    } catch (claudeErr: any) {
+      console.error("Claude Vision error:", claudeErr.message || claudeErr);
+      return res.status(502).json({
+        error: `No se pudo analizar la imagen con Claude: ${claudeErr.message || "error desconocido"}. Reintenta o revisa tu API Key.`
+      });
     }
-
-    // Smart Fallback if Gemini API is offline or image format unreadable
-    const randomProduct = localProducts[Math.floor(Math.random() * localProducts.length)] || {
-      name: "Cargador Batería Portátil Powerbank Gadnic",
-      sku: `Ablue${Math.floor(100 + Math.random() * 900)}`,
-      category: "Accesorios",
-      brand: "AKARI / Gadnic",
-      description: "Cargador portátil Powerbank con indicador LED digital y doble salida USB.",
-      price: 25000,
-      cost: 12500,
-      stock: 8,
-      minStock: 5,
-      supplier: "AKARI Import Direct",
-      location: "Depósito Central - Estante A2"
-    };
-
-    return res.json({
-      success: true,
-      aiFallback: true,
-      productInfo: {
-        name: randomProduct.name || "Producto Detectado Gadnic",
-        sku: randomProduct.sku || `Ablue${Math.floor(100 + Math.random() * 900)}`,
-        category: randomProduct.category || "General",
-        brand: randomProduct.brand || "AKARI / Gadnic",
-        description: randomProduct.description || "Ficha técnica aproximada escaneada desde la imagen.",
-        price: randomProduct.price || 28000,
-        wholesalePrice: randomProduct.wholesalePrice || Math.round((randomProduct.price || 28000) * 0.75),
-        cost: randomProduct.cost || 14000,
-        stock: randomProduct.stock || 5,
-        minStock: randomProduct.minStock || 5,
-        supplier: randomProduct.supplier || "AKARI Import Direct",
-        location: randomProduct.location || "Depósito Central - Estante 1"
-      }
-    });
 
   } catch (error: any) {
     console.error("Error analyzing image:", error);
-    res.status(200).json({
-      success: true,
-      aiFallback: true,
-      productInfo: {
-        name: "Producto Escaneado AKARI",
-        sku: `Ablue${Math.floor(100 + Math.random() * 900)}`,
-        category: "Audio / Gadgets",
-        brand: "AKARI / Gadnic",
-        description: "Producto escaneado por cámara. Puedes verificar y editar sus campos antes de guardar.",
-        price: 28000,
-        cost: 14000,
-        stock: 5,
-        minStock: 5,
-        supplier: "AKARI Import Direct",
-        location: "Depósito Central - Estante 1"
-      }
+    return res.status(500).json({
+      error: "Ocurrió un error inesperado al analizar la imagen. Intenta nuevamente."
     });
   }
 });
@@ -1100,11 +1053,11 @@ app.post("/api/sheets/edit-product", (req, res) => {
 app.post("/api/ai/chat", async (req, res) => {
   try {
     const { message } = req.body;
-    const ai = getGeminiClient(req);
+    const apiKey = getClaudeApiKey(req);
 
     const stockSummary = localProducts.map(p => `${p.sku} - ${p.name} (Stock: ${p.stock}, Precio: $${p.price})`).join("; ");
 
-    if (ai) {
+    if (apiKey) {
       try {
         const systemInstruction = `Eres AKARI Bot, el Asistente Inteligente de AKARI Import (electro & home), especializado en inventario y sincronizado con Google Sheets ID 1N8PfteP7mt4KtEZlUFwGfLUND21Jzd8XZbWMnRsMhKM.
 Responde de forma concisa y amable en español argentino.
@@ -1112,19 +1065,19 @@ Responde de forma concisa y amable en español argentino.
 Inventario real cargado desde la planilla Google Sheets:
 ${stockSummary}`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
-          contents: `${systemInstruction}\n\nPregunta: ${message}`
+        const replyText = await callClaude(apiKey, {
+          system: systemInstruction,
+          messages: [{ role: "user", content: message }]
         });
 
-        if (response && response.text) {
+        if (replyText) {
           return res.json({
-            reply: response.text,
+            reply: replyText,
             timestamp: new Date().toISOString()
           });
         }
-      } catch (geminiErr: any) {
-        console.warn("Gemini chat fallback:", geminiErr.message || geminiErr);
+      } catch (claudeErr: any) {
+        console.warn("Claude chat fallback:", claudeErr.message || claudeErr);
       }
     }
 
