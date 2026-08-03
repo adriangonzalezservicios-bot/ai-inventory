@@ -480,52 +480,62 @@ function getStockStatus(stock: number, minStock: number): "in_stock" | "low_stoc
 let customRuntimeGeminiKey: string | null = null;
 
 function getGeminiClient(reqOrKey?: express.Request | string): GoogleGenAI | null {
-  let apiKey: string | undefined = undefined;
+  let rawKey: string | undefined = undefined;
 
   if (typeof reqOrKey === "string" && reqOrKey.trim()) {
-    apiKey = reqOrKey.trim();
+    rawKey = reqOrKey;
   } else if (reqOrKey && typeof reqOrKey === "object") {
-    const headerKey = reqOrKey.headers?.["x-gemini-api-key"] as string | undefined;
-    const bodyKey = reqOrKey.body?.customApiKey as string | undefined;
-    apiKey = headerKey?.trim() || bodyKey?.trim();
+    const headerKey = (reqOrKey.headers?.["x-gemini-api-key"] || reqOrKey.headers?.["x-goog-api-key"]) as string | undefined;
+    const bodyKey = reqOrKey.body?.customApiKey || reqOrKey.body?.apiKey;
+    rawKey = headerKey || bodyKey;
   }
 
-  apiKey = apiKey || customRuntimeGeminiKey || process.env.GEMINI_API_KEY;
+  rawKey = rawKey || customRuntimeGeminiKey || process.env.GEMINI_API_KEY;
 
-  if (apiKey) {
-    try {
-      return new GoogleGenAI({ 
-        apiKey,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build'
+  if (rawKey && typeof rawKey === "string") {
+    const cleanKey = rawKey.trim().replace(/^["']|["']$/g, '');
+    if (cleanKey) {
+      console.log(`[Gemini Debug Step 1] ¿Hay API Key?: ${!!cleanKey} | Longitud: ${cleanKey.length}`);
+      try {
+        return new GoogleGenAI({ 
+          apiKey: cleanKey,
+          httpOptions: {
+            headers: {
+              'User-Agent': 'aistudio-build'
+            }
           }
-        }
-      });
-    } catch (e) {
-      console.error("Error instantiating GoogleGenAI client:", e);
+        });
+      } catch (e) {
+        console.error("[Gemini Debug Step 3] Error al instanciar cliente GoogleGenAI:", e);
+      }
     }
+  } else {
+    console.log("[Gemini Debug Step 1] ¿Hay API Key?: false (undefined o vacía)");
   }
   return null;
 }
 
 // Config endpoints for Gemini API key
 app.post("/api/config/gemini-key", async (req, res) => {
-  try {
-    const { apiKey } = req.body;
-    if (!apiKey || typeof apiKey !== "string" || !apiKey.trim()) {
-      customRuntimeGeminiKey = null;
-      return res.json({
-        success: true,
-        message: "API Key personalizada eliminada. Usando clave por defecto del servidor si existe.",
-        isConfigured: !!process.env.GEMINI_API_KEY,
-        isCustom: false
-      });
-    }
+  const { apiKey } = req.body;
+  
+  if (!apiKey || typeof apiKey !== "string" || !apiKey.trim()) {
+    customRuntimeGeminiKey = null;
+    console.log("[Gemini Key Config] Clave personalizada eliminada. Usando servidor por defecto.");
+    return res.json({
+      success: true,
+      message: "API Key personalizada eliminada. Usando clave por defecto del servidor si existe.",
+      isConfigured: !!process.env.GEMINI_API_KEY,
+      isCustom: false
+    });
+  }
 
-    const testKey = apiKey.trim();
+  const cleanKey = apiKey.trim().replace(/^["']|["']$/g, '');
+  console.log(`[Gemini Debug Step 1 & 4] Verificando clave ingresada por usuario. ¿Hay API Key?: true | Longitud: ${cleanKey.length}`);
+
+  try {
     const testAi = new GoogleGenAI({ 
-      apiKey: testKey,
+      apiKey: cleanKey,
       httpOptions: {
         headers: {
           'User-Agent': 'aistudio-build'
@@ -533,39 +543,45 @@ app.post("/api/config/gemini-key", async (req, res) => {
       }
     });
 
-    // Test Gemini API with a minimal prompt
+    const targetModel = 'gemini-3.6-flash';
+    console.log(`[Gemini Debug Step 2] Ejecutando prueba de conexión con modelo oficial: ${targetModel}`);
+
+    // Step 3: Try/Catch con log detallado del error original
     const testResponse = await testAi.models.generateContent({
-      model: 'gemini-3.6-flash',
-      contents: 'Responder OK'
+      model: targetModel,
+      contents: 'Responde únicamente con la palabra OK.'
     });
 
     if (testResponse && testResponse.text) {
-      customRuntimeGeminiKey = testKey;
+      customRuntimeGeminiKey = cleanKey;
+      console.log("[Gemini Debug Step 3] ¡Prueba exitosa! Respuesta de Gemini:", testResponse.text.trim());
       return res.json({
         success: true,
-        message: "API Key de Gemini verificada y configurada correctamente.",
+        message: "API Key de Gemini verificada y configurada correctamente con modelo gemini-3.6-flash.",
         isConfigured: true,
         isCustom: true
       });
     }
 
     return res.status(400).json({
-      error: "La clave no retornó respuesta de Gemini. Verifica la API key en Google AI Studio."
+      error: "La clave no retornó respuesta de Gemini. Verifica los permisos de tu API key en Google AI Studio."
     });
   } catch (err: any) {
-    console.error("Error testing Gemini key:", err);
-    let cleanMessage = err.message || "Clave no válida o sin permisos";
+    console.error("[Gemini Debug Step 3] ERROR ORIGINAL COMPLETO DEVUELTO POR GOOGLE GEMINI API:", err);
+    
+    let originalErrorText = err.message || String(err);
     try {
-      if (typeof cleanMessage === 'string' && cleanMessage.includes('{')) {
-        const jsonStart = cleanMessage.indexOf('{');
-        const parsedErr = JSON.parse(cleanMessage.substring(jsonStart));
+      if (typeof originalErrorText === 'string' && originalErrorText.includes('{')) {
+        const jsonStart = originalErrorText.indexOf('{');
+        const parsedErr = JSON.parse(originalErrorText.substring(jsonStart));
         if (parsedErr?.error?.message) {
-          cleanMessage = parsedErr.error.message;
+          originalErrorText = parsedErr.error.message;
         }
       }
     } catch (_) {}
+
     return res.status(400).json({
-      error: `Error al validar la API Key: ${cleanMessage}`
+      error: `Error de API de Google Gemini: ${originalErrorText}`
     });
   }
 });
@@ -805,7 +821,7 @@ Responde ÚNICAMENTE en formato JSON plano sin bloques de marcado markdown extra
         const parsed = JSON.parse(responseText);
         return res.json({ success: true, aiAnalysis: parsed });
       } catch (geminiErr: any) {
-        console.warn("Gemini analyze-stock fallback:", geminiErr.message || geminiErr);
+        console.error("[Gemini Debug Step 3 - Error Original analyze-stock]:", geminiErr);
       }
     }
 
@@ -892,7 +908,7 @@ Devuelve un JSON con:
         const parsed = JSON.parse(responseText);
         return res.json({ success: true, result: parsed });
       } catch (geminiErr: any) {
-        console.warn("Gemini optimize-product fallback:", geminiErr.message || geminiErr);
+        console.error("[Gemini Debug Step 3 - Error Original optimize-product]:", geminiErr);
       }
     }
 
@@ -985,7 +1001,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura:
         const parsed = JSON.parse(responseText);
         return res.json({ success: true, productInfo: parsed });
       } catch (geminiErr: any) {
-        console.warn("Gemini Vision model warning/fallback:", geminiErr.message || geminiErr);
+        console.error("[Gemini Debug Step 3 - Error Original analyze-image]:", geminiErr);
       }
     }
 
@@ -1124,7 +1140,7 @@ ${stockSummary}`;
           });
         }
       } catch (geminiErr: any) {
-        console.warn("Gemini chat fallback:", geminiErr.message || geminiErr);
+        console.error("[Gemini Debug Step 3 - Error Original chat]:", geminiErr);
       }
     }
 
