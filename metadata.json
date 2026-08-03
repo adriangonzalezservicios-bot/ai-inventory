@@ -1,6 +1,6 @@
 {
   "name": "AKARI Import - Gestión de Stock & AI",
-  "description": "Plataforma de gestión de stock en tiempo real con IA, cámara de detección inteligente de productos y sincronización con Google Sheets para AKARI Import (Electro & Home).",
+  "description": "Plataforma de gestión de stock en tiempo real con IA, escáner inteligente y sincronización con Google Sheets para AKARI Import (https://mhc.com.ar). Compatible con Google Cloud, GitHub y Cloudflare.",
   "requestFramePermissions": [
     "camera"
   ],

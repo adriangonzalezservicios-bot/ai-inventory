@@ -1,7 +1,7 @@
 {
   "short_name": "AKARI Stock",
-  "name": "AKARI Import - Control de Stock & IA",
-  "description": "Sistema de gestión de inventario en tiempo real, escáner IA y sincronización con Google Sheets para AKARI Import",
+  "name": "AKARI Import - Control de Stock & IA (mhc.com.ar)",
+  "description": "Sistema de gestión de inventario en tiempo real, escáner IA y sincronización con Google Sheets para AKARI Import alojado en https://mhc.com.ar",
   "icons": [
     {
       "src": "/icon.svg",
