@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Product } from '../types';
 import { 
   Package, Plus, Minus, AlertTriangle, CheckCircle2, XCircle, 
-  Sparkles, Filter, Edit3, Check, Camera
+  Sparkles, Filter, Edit3, Check, Camera, FileText
 } from 'lucide-react';
 
 interface StockListProps {
@@ -13,6 +13,7 @@ interface StockListProps {
   onOpenAddModal: () => void;
   onOpenEditModal: (product: Product) => void;
   onOpenAICameraModal: () => void;
+  onOpenPDFReportModal?: () => void;
   searchQuery: string;
 }
 
@@ -24,6 +25,7 @@ export const StockList: React.FC<StockListProps> = ({
   onOpenAddModal,
   onOpenEditModal,
   onOpenAICameraModal,
+  onOpenPDFReportModal,
   searchQuery,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -114,16 +116,28 @@ export const StockList: React.FC<StockListProps> = ({
           )}
         </div>
 
-        {/* View Mode & Camera Action */}
+        {/* View Mode & Camera & Report Actions */}
         <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2">
           
+          {onOpenPDFReportModal && (
+            <button
+              onClick={onOpenPDFReportModal}
+              id="btn-pdf-report-stocklist"
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center space-x-1.5 border border-slate-700 transition cursor-pointer"
+              title="Generar e imprimir Reporte PDF de Inventario"
+            >
+              <FileText className="w-3.5 h-3.5 text-[#83a456]" />
+              <span>Reporte PDF</span>
+            </button>
+          )}
+
           <button
             onClick={onOpenAICameraModal}
             className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center space-x-1.5 border border-slate-700 transition cursor-pointer"
             title="Escanear producto con cámara"
           >
             <Camera className="w-3.5 h-3.5 text-[#83a456]" />
-            <span>Escanear Producto</span>
+            <span className="hidden sm:inline">Escanear</span>
           </button>
 
           <div className="bg-slate-950 p-1 rounded-lg border border-slate-800 flex space-x-1">

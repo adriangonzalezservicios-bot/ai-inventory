@@ -12,6 +12,7 @@ import { EditProductModal } from './components/EditProductModal';
 import { AICameraScannerModal } from './components/AICameraScannerModal';
 import { BarcodeScannerModal } from './components/BarcodeScannerModal';
 import { GeminiKeyConfigModal } from './components/GeminiKeyConfigModal';
+import { PDFReportModal } from './components/PDFReportModal';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
 import { INITIAL_PRODUCTS, INITIAL_MOVEMENTS } from './data/initialStock';
 
@@ -41,6 +42,7 @@ export default function App() {
   const [isAICameraOpen, setIsAICameraOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isGeminiKeyModalOpen, setIsGeminiKeyModalOpen] = useState(false);
+  const [isPDFReportModalOpen, setIsPDFReportModalOpen] = useState(false);
   const [selectedProductForSEO, setSelectedProductForSEO] = useState<Product | null>(null);
 
   // Sync Activity Logs
@@ -287,6 +289,7 @@ export default function App() {
         onOpenAICamera={() => setIsAICameraOpen(true)}
         onRunAIAudit={() => setActiveTab('ai-insights')}
         onOpenGeminiKeyModal={() => setIsGeminiKeyModalOpen(true)}
+        onOpenPDFReportModal={() => setIsPDFReportModalOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         spreadsheetId={sheetConfig.spreadsheetId}
@@ -312,6 +315,7 @@ export default function App() {
             onOpenAddModal={() => setIsAddModalOpen(true)}
             onOpenEditModal={handleOpenEditModal}
             onOpenAICameraModal={() => setIsAICameraOpen(true)}
+            onOpenPDFReportModal={() => setIsPDFReportModalOpen(true)}
             searchQuery={searchQuery}
           />
         )}
@@ -385,6 +389,12 @@ export default function App() {
       <GeminiKeyConfigModal
         isOpen={isGeminiKeyModalOpen}
         onClose={() => setIsGeminiKeyModalOpen(false)}
+      />
+
+      <PDFReportModal
+        isOpen={isPDFReportModalOpen}
+        onClose={() => setIsPDFReportModalOpen(false)}
+        products={products}
       />
 
     </div>

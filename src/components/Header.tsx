@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCw, Database, Camera, QrCode, Search, Sparkles, Key } from 'lucide-react';
+import { RefreshCw, Database, Camera, QrCode, Search, Sparkles, Key, FileText } from 'lucide-react';
 import { AkariLogo } from './AkariLogo';
 
 interface HeaderProps {
@@ -10,6 +10,7 @@ interface HeaderProps {
   onOpenAICamera: () => void;
   onRunAIAudit: () => void;
   onOpenGeminiKeyModal: () => void;
+  onOpenPDFReportModal: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   spreadsheetId: string;
@@ -23,6 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAICamera,
   onRunAIAudit,
   onOpenGeminiKeyModal,
+  onOpenPDFReportModal,
   searchQuery,
   setSearchQuery,
   spreadsheetId,
@@ -100,6 +102,17 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Key className="w-3.5 h-3.5 text-purple-400" />
               <span className="hidden lg:inline">API Key IA</span>
+            </button>
+
+            {/* PDF Report Export */}
+            <button
+              onClick={onOpenPDFReportModal}
+              id="btn-pdf-report-header"
+              className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center space-x-1.5 border border-slate-700 transition cursor-pointer"
+              title="Generar e imprimir Reporte PDF de Inventario"
+            >
+              <FileText className="w-3.5 h-3.5 text-[#83a456]" />
+              <span className="hidden lg:inline">Reporte PDF</span>
             </button>
 
             {/* Sheets Sync Button */}
