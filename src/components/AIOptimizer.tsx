@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { getAIHeaders } from '../utils/aiHeaders';
+import { getApiUrl } from '../utils/apiUrl';
 
 interface AIOptimizerProps {
   products: Product[];
@@ -31,7 +32,7 @@ export const AIOptimizer: React.FC<AIOptimizerProps> = ({
   const runAIAnalysis = async () => {
     setLoadingAnalysis(true);
     try {
-      const res = await fetch('/api/ai/analyze-stock', { method: 'POST', headers: getAIHeaders() });
+      const res = await fetch(getApiUrl('/api/ai/analyze-stock'), { method: 'POST', headers: getAIHeaders() });
       const data = await res.json();
       if (data.success) {
         setAiData(data.aiAnalysis);
@@ -46,7 +47,7 @@ export const AIOptimizer: React.FC<AIOptimizerProps> = ({
   const runSEOOptimization = async (productToOptimize: Product) => {
     setGeneratingSEO(true);
     try {
-      const res = await fetch('/api/ai/optimize-product', {
+      const res = await fetch(getApiUrl('/api/ai/optimize-product'), {
         method: 'POST',
         headers: getAIHeaders(),
         body: JSON.stringify({

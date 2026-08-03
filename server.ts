@@ -13,7 +13,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Headers", "*");
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
@@ -96,7 +96,7 @@ let localProducts: any[] = [
     supplier: 'AKARI Import Direct',
     location: 'Depósito Central - Estante A3',
     lastUpdated: new Date().toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1572536147248-ac59a8abfa4d?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80',
     description: 'Auriculares TWS con estuche de carga inteligente.',
     tags: ['audio', 'tws', 'bluetooth'],
     status: 'low_stock'
@@ -204,7 +204,7 @@ let localProducts: any[] = [
     supplier: 'AKARI Import Direct',
     location: 'Depósito B - Estante B1',
     lastUpdated: new Date().toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=400&q=80',
     description: 'Cargador portátil metálico delgado de 10000mAh.',
     tags: ['powerbank', 'cargador'],
     status: 'low_stock'
@@ -240,7 +240,7 @@ let localProducts: any[] = [
     supplier: 'AKARI Import Direct',
     location: 'Depósito B - Estante B3',
     lastUpdated: new Date().toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=400&q=80',
     description: 'Powerbank de 15000mAh con USB-C Carga Rápida.',
     tags: ['powerbank', 'bc-19'],
     status: 'low_stock'
@@ -276,7 +276,7 @@ let localProducts: any[] = [
     supplier: 'AKARI Import Direct',
     location: 'Depósito B - Estante B5',
     lastUpdated: new Date().toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=400&q=80',
     description: 'Batería externa con pantalla LCD indicadora.',
     tags: ['powerbank', 'k43'],
     status: 'low_stock'
@@ -312,7 +312,7 @@ let localProducts: any[] = [
     supplier: 'AKARI Import Direct',
     location: 'Depósito B - Estante B7',
     lastUpdated: new Date().toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=400&q=80',
     description: 'Powerbank 10000mAh USB-C.',
     tags: ['powerbank', 'bc-26'],
     status: 'low_stock'
@@ -369,7 +369,10 @@ let stockMovements: Array<{
 async function syncFromGoogleSheets(spreadsheetId: string) {
   try {
     const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv`;
-    const res = await fetch(url);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (!res.ok) {
       console.error("Failed to fetch Google Sheets CSV:", res.status);
       return;
@@ -430,7 +433,7 @@ async function syncFromGoogleSheets(spreadsheetId: string) {
       // Select nice representative image based on category
       let imageUrl = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80";
       if (category === "Cargadores y Powerbanks" || sku.startsWith("BC")) {
-        imageUrl = "https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=400&q=80";
+        imageUrl = "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=400&q=80";
       }
 
       // Check if product was modified locally
@@ -543,7 +546,7 @@ app.post("/api/config/gemini-key", async (req, res) => {
       }
     });
 
-    const targetModel = 'gemini-3.6-flash';
+    const targetModel = 'gemini-2.5-flash';
     console.log(`[Gemini Debug Step 2] Ejecutando prueba de conexión con modelo oficial: ${targetModel}`);
 
     // Step 3: Try/Catch con log detallado del error original
@@ -557,7 +560,7 @@ app.post("/api/config/gemini-key", async (req, res) => {
       console.log("[Gemini Debug Step 3] ¡Prueba exitosa! Respuesta de Gemini:", testResponse.text.trim());
       return res.json({
         success: true,
-        message: "API Key de Gemini verificada y configurada correctamente con modelo gemini-3.6-flash.",
+        message: "API Key de Gemini verificada y configurada correctamente con modelo gemini-2.5-flash.",
         isConfigured: true,
         isCustom: true
       });
@@ -610,8 +613,12 @@ app.get("/api/health", (req, res) => {
 app.get("/api/sheets/stock", async (req, res) => {
   const spreadsheetId = (req.query.spreadsheetId as string) || "1N8PfteP7mt4KtEZlUFwGfLUND21Jzd8XZbWMnRsMhKM";
   
-  // Re-sync live from Google Sheets
-  await syncFromGoogleSheets(spreadsheetId);
+  try {
+    // Re-sync live from Google Sheets
+    await syncFromGoogleSheets(spreadsheetId);
+  } catch (err) {
+    console.error("Warning syncing sheets:", err);
+  }
 
   res.json({
     spreadsheetId,
@@ -810,7 +817,7 @@ Por favor, realiza una auditoría completa de optimización de stock en formato 
 Responde ÚNICAMENTE en formato JSON plano sin bloques de marcado markdown extras.`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
+          model: 'gemini-2.5-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json'
@@ -897,7 +904,7 @@ Devuelve un JSON con:
 }`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
+          model: 'gemini-2.5-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json'
@@ -977,7 +984,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura:
 }`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
+          model: 'gemini-2.5-flash',
           contents: [
             {
               role: 'user',
@@ -1129,7 +1136,7 @@ Inventario real cargado desde la planilla Google Sheets:
 ${stockSummary}`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
+          model: 'gemini-2.5-flash',
           contents: `${systemInstruction}\n\nPregunta: ${message}`
         });
 

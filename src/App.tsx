@@ -15,6 +15,7 @@ import { GeminiKeyConfigModal } from './components/GeminiKeyConfigModal';
 import { PDFReportModal } from './components/PDFReportModal';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
 import { INITIAL_PRODUCTS, INITIAL_MOVEMENTS } from './data/initialStock';
+import { getApiUrl } from './utils/apiUrl';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('stock');
@@ -61,7 +62,7 @@ export default function App() {
   const fetchLiveStock = async () => {
     setIsSyncing(true);
     try {
-      const res = await fetch(`/api/sheets/stock?spreadsheetId=${sheetConfig.spreadsheetId}`);
+      const res = await fetch(getApiUrl(`/api/sheets/stock?spreadsheetId=${sheetConfig.spreadsheetId}`));
       const data = await res.json();
       if (data.products && Array.isArray(data.products) && data.products.length > 0) {
         setProducts(data.products);
@@ -87,7 +88,7 @@ export default function App() {
   // Update stock handler (+/- delta or direct set)
   const handleUpdateStock = async (productId: string, delta: number) => {
     try {
-      const res = await fetch('/api/sheets/update-stock', {
+      const res = await fetch(getApiUrl('/api/sheets/update-stock'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -125,7 +126,7 @@ export default function App() {
 
   const handleSetStockDirect = async (productId: string, newStock: number) => {
     try {
-      const res = await fetch('/api/sheets/update-stock', {
+      const res = await fetch(getApiUrl('/api/sheets/update-stock'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -151,7 +152,7 @@ export default function App() {
   // Add new product handler
   const handleAddProduct = async (productData: Partial<Product>) => {
     try {
-      const res = await fetch('/api/sheets/add-product', {
+      const res = await fetch(getApiUrl('/api/sheets/add-product'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData)
@@ -180,7 +181,7 @@ export default function App() {
   // Full Edit existing product handler
   const handleSaveEditedProduct = async (updatedProduct: Product) => {
     try {
-      const res = await fetch('/api/sheets/edit-product', {
+      const res = await fetch(getApiUrl('/api/sheets/edit-product'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedProduct)
@@ -209,7 +210,7 @@ export default function App() {
   // Export Google Drive backup handler
   const handleExportDriveBackup = async () => {
     try {
-      const res = await fetch('/api/drive/export-backup', { method: 'POST' });
+      const res = await fetch(getApiUrl('/api/drive/export-backup'), { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         setBackupSuccessMessage(data.message);

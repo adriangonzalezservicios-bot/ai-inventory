@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Key, CheckCircle2, AlertCircle, Eye, EyeOff, ExternalLink, Sparkles, RefreshCw, Trash2 } from 'lucide-react';
+import { getApiUrl } from '../utils/apiUrl';
 
 interface GeminiKeyConfigModalProps {
   isOpen: boolean;
@@ -32,7 +33,7 @@ export const GeminiKeyConfigModal: React.FC<GeminiKeyConfigModalProps> = ({ isOp
       if (currentKey) {
         headers['x-gemini-api-key'] = currentKey;
       }
-      const res = await fetch('/api/config/gemini-key', { headers });
+      const res = await fetch(getApiUrl('/api/config/gemini-key'), { headers });
       const text = await res.text();
       let data = { isConfigured: false, isCustom: false, hasServerKey: false };
       try {
@@ -59,7 +60,7 @@ export const GeminiKeyConfigModal: React.FC<GeminiKeyConfigModalProps> = ({ isOp
     setStatusMessage(null);
 
     try {
-      const res = await fetch('/api/config/gemini-key', {
+      const res = await fetch(getApiUrl('/api/config/gemini-key'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey: trimmedKey }),
@@ -104,7 +105,7 @@ export const GeminiKeyConfigModal: React.FC<GeminiKeyConfigModalProps> = ({ isOp
     setStatusMessage(null);
 
     try {
-      await fetch('/api/config/gemini-key', {
+      await fetch(getApiUrl('/api/config/gemini-key'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey: '' }),

@@ -53,7 +53,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     supplier: 'AKARI Import Direct',
     location: 'Depósito Central - Estante A3',
     lastUpdated: new Date().toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1572536147248-ac59a8abfa4d?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80',
     description: 'Auriculares TWS con estuche de carga inteligente y emparejamiento automático.',
     tags: ['audio', 'tws', 'bluetooth', 'base-carga'],
     status: 'low_stock'
@@ -167,7 +167,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     supplier: 'AKARI Import Direct',
     location: 'Depósito B - Estante B1',
     lastUpdated: new Date().toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=400&q=80',
     description: 'Cargador portátil metálico delgado de 10000mAh con doble salida USB.',
     tags: ['powerbank', 'cargador', '10000mah'],
     status: 'low_stock'
@@ -205,7 +205,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     supplier: 'AKARI Import Direct',
     location: 'Depósito B - Estante B3',
     lastUpdated: new Date().toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=400&q=80',
     description: 'Powerbank de 15000mAh con entrada/salida USB-C Carga Rápida Power Delivery.',
     tags: ['powerbank', 'bc-19', 'usb-c'],
     status: 'low_stock'
@@ -242,7 +242,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     supplier: 'AKARI Import Direct',
     location: 'Depósito B - Estante B5',
     lastUpdated: new Date().toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=400&q=80',
     description: 'Batería externa con pantalla LCD indicadora de porcentaje de carga exacto.',
     tags: ['powerbank', 'k43', 'display-lcd'],
     status: 'low_stock'
@@ -280,7 +280,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     supplier: 'AKARI Import Direct',
     location: 'Depósito B - Estante B7',
     lastUpdated: new Date().toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=400&q=80',
     description: 'Powerbank de 10000mAh ultraliviano con puerto USB-C de recarga acelerada.',
     tags: ['powerbank', 'bc-26', '10000mah'],
     status: 'low_stock'
