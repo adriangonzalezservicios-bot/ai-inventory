@@ -548,7 +548,7 @@ app.post("/api/config/gemini-key", async (req, res) => {
       }
     });
 
-    const targetModel = 'gemini-2.5-flash';
+    const targetModel = 'gemini-3.6-flash';
     console.log(`[Gemini Debug Step 2] Ejecutando prueba de conexión con modelo oficial: ${targetModel}`);
 
     // Step 3: Try/Catch con log detallado del error original
@@ -562,7 +562,7 @@ app.post("/api/config/gemini-key", async (req, res) => {
       console.log("[Gemini Debug Step 3] ¡Prueba exitosa! Respuesta de Gemini:", testResponse.text.trim());
       return res.json({
         success: true,
-        message: "API Key de Gemini verificada y configurada correctamente con modelo gemini-2.5-flash.",
+        message: "API Key de Gemini verificada y configurada correctamente con modelo gemini-3.6-flash.",
         isConfigured: true,
         isCustom: true
       });
@@ -819,7 +819,7 @@ Por favor, realiza una auditoría completa de optimización de stock en formato 
 Responde ÚNICAMENTE en formato JSON plano sin bloques de marcado markdown extras.`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.6-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json'
@@ -906,7 +906,7 @@ Devuelve un JSON con:
 }`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.6-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json'
@@ -986,7 +986,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura:
 }`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.6-flash',
           contents: [
             {
               role: 'user',
@@ -1138,7 +1138,7 @@ Inventario real cargado desde la planilla Google Sheets:
 ${stockSummary}`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.6-flash',
           contents: `${systemInstruction}\n\nPregunta: ${message}`
         });
 
